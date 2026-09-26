@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LinkedIn Engagement Intake | Aryan Gulati</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #F3F5F4;
+  --surface: #FFFFFF;
+  --ink: #18202E;
+  --muted: #586273;
+  --rule: #D8DDE2;
+  --blue: #1D3F8F;
+  --blue-ink: #FFFFFF;
+  --blue-soft: #E3E9F5;
+  --sepia: #8A5936;
+  --serif: "Spectral", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --sans: "Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0D1526; --surface: #142038; --ink: #E7EBF2; --muted: #A2ADBF;
+    --rule: #28365A; --blue: #8FB0FF; --blue-ink: #0D1526; --blue-soft: #1B2A50; --sepia: #D8A77E;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0D1526; --surface: #142038; --ink: #E7EBF2; --muted: #A2ADBF;
+  --rule: #28365A; --blue: #8FB0FF; --blue-ink: #0D1526; --blue-soft: #1B2A50; --sepia: #D8A77E;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--sans); font-size: 16px; line-height: 1.55;
+}
+img { max-width: 100%; }
+button, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.shell { display: grid; grid-template-columns: 17rem minmax(0, 1fr); min-height: 100vh; }
+.rail {
+  position: sticky; top: env(safe-area-inset-top, 0px); align-self: start;
+  height: calc(100vh - env(safe-area-inset-top, 0px)); overflow-y: auto;
+  border-right: 1px solid var(--rule); padding: 2rem 1.25rem 2rem 1.75rem;
+}
+.rail-name { font-family: var(--serif); font-size: 1.15rem; font-weight: 500; margin: 0; }
+.rail-role { color: var(--muted); font-size: .85rem; margin: .15rem 0 1.75rem; }
+.rail ol { list-style: none; margin: 0; padding: 0; }
+.rail li + li { margin-top: .15rem; }
+.rail button {
+  width: 100%; display: grid; grid-template-columns: 1.6rem 1fr auto; gap: .5rem; align-items: baseline;
+  text-align: left; background: none; border: 0; padding: .45rem .5rem; border-radius: 4px; cursor: pointer;
+  font-size: .9rem; color: var(--muted);
+}
+.rail button:hover { color: var(--ink); background: var(--blue-soft); }
+.rail button[aria-current="step"] { color: var(--ink); font-weight: 600; background: var(--blue-soft); }
+.rail .num { font-variant-numeric: tabular-nums; }
+.rail .count { font-size: .75rem; font-variant-numeric: tabular-nums; }
+.rail .count.full { color: var(--blue); font-weight: 600; }
+
+/* Exposure strip: fills in cyanotype blue as answers accumulate */
+.strip { display: flex; gap: 3px; margin: 1.5rem 0 .5rem; }
+.strip span { flex: 1; height: 6px; background: var(--rule); border-radius: 1px; transition: background-color .4s ease; }
+.strip span.lvl1 { background: color-mix(in srgb, var(--blue) 35%, var(--rule)); }
+.strip span.lvl2 { background: color-mix(in srgb, var(--blue) 70%, var(--rule)); }
+.strip span.lvl3 { background: var(--blue); }
+.strip-label { font-size: .78rem; color: var(--muted); margin: 0; }
+.saved { font-size: .78rem; color: var(--muted); margin-top: 1.25rem; }
+
+.topbar { display: none; }
+main { padding: 3.5rem clamp(1.25rem, 5vw, 4rem) 5rem; }
+.col { max-width: 42rem; }
+
+.intro h1 {
+  font-family: var(--serif); font-weight: 400; font-size: clamp(2.3rem, 5.5vw, 3.6rem);
+  line-height: 1.08; letter-spacing: -.01em; margin: 0 0 1.5rem;
+}
+.lede { font-family: var(--serif); font-size: 1.2rem; line-height: 1.65; margin: 0 0 1rem; }
+.intro p { max-width: 38rem; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: .55rem 1.5rem; margin: 2rem 0; padding: 1.25rem 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.facts dt { color: var(--muted); font-size: .9rem; }
+.facts dd { margin: 0; }
+.guidance { padding-left: 1.1rem; margin: 0 0 2rem; }
+.guidance li { margin: .35rem 0; }
+
+.sec-head { margin-bottom: 2.25rem; }
+.sec-kicker { color: var(--sepia); font-size: .9rem; margin: 0 0 .35rem; font-variant-numeric: tabular-nums; }
+.sec-head h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(1.8rem, 4vw, 2.4rem); line-height: 1.15; margin: 0 0 .9rem; }
+.sec-head p { font-family: var(--serif); font-size: 1.1rem; line-height: 1.65; color: var(--muted); margin: 0; }
+.group { font-family: var(--serif); font-style: italic; font-size: 1.15rem; color: var(--sepia); margin: 2.75rem 0 .25rem; }
+
+.q { padding: 1.6rem 0; border-top: 1px solid var(--rule); }
+.q fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.prompt { display: grid; grid-template-columns: 2.6rem 1fr; gap: .25rem; margin-bottom: .8rem; }
+.prompt .n { color: var(--muted); font-size: .85rem; padding-top: .25rem; font-variant-numeric: tabular-nums; }
+.prompt .t { font-family: var(--serif); font-size: 1.14rem; line-height: 1.5; font-weight: 500; }
+legend.prompt { padding: 0; width: 100%; }
+.help { color: var(--muted); font-size: .9rem; margin: -.4rem 0 .8rem 2.85rem; }
+.field { margin-left: 2.85rem; }
+
+input[type="text"], input[type="url"], textarea {
+  width: 100%; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px;
+  padding: .7rem .8rem; line-height: 1.5;
+}
+textarea { min-height: 5.2rem; resize: vertical; overflow: hidden; }
+input[type="text"]:focus, input[type="url"]:focus, textarea:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px var(--blue-soft); }
+.sub-input { margin-top: .75rem; }
+.sub-label { display: block; font-size: .88rem; color: var(--muted); margin: .9rem 0 .35rem; }
+
+.seg { display: flex; flex-wrap: wrap; gap: .45rem; }
+.seg label { position: relative; }
+.seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.seg span {
+  display: inline-block; padding: .5rem .9rem; border: 1px solid var(--rule); border-radius: 999px;
+  background: var(--surface); font-size: .92rem; cursor: pointer; transition: background-color .15s, border-color .15s;
+}
+.seg input:checked + span { background: var(--blue); border-color: var(--blue); color: var(--blue-ink); }
+.seg input:focus-visible + span { outline: 2px solid var(--blue); outline-offset: 2px; }
+.seg label:hover span { border-color: var(--blue); }
+
+.checks { display: grid; gap: .1rem; }
+.check-row { display: flex; align-items: center; gap: .5rem; }
+.check-row label { flex: 1; display: flex; gap: .7rem; align-items: flex-start; padding: .45rem 0; cursor: pointer; }
+.check-row input[type="checkbox"] { width: 1.1rem; height: 1.1rem; margin: .2rem 0 0; accent-color: var(--blue); flex: none; }
+.star {
+  border: 1px solid var(--rule); background: var(--surface); border-radius: 999px; padding: .2rem .65rem;
+  font-size: .8rem; color: var(--muted); cursor: pointer;
+}
+.star[aria-pressed="true"] { background: var(--sepia); border-color: var(--sepia); color: var(--surface); }
+.star:disabled { opacity: .35; cursor: not-allowed; }
+.hint { font-size: .85rem; color: var(--sepia); min-height: 1.2rem; margin: .4rem 0 0; }
+
+.scale-row { padding: .9rem 0; border-bottom: 1px dashed var(--rule); }
+.scale-row:last-child { border-bottom: 0; }
+.scale-ends { display: flex; justify-content: space-between; gap: 1rem; font-size: .9rem; margin-bottom: .55rem; }
+.scale-ends span:last-child { text-align: right; }
+.dots { display: grid; grid-template-columns: repeat(5, 1fr); gap: .4rem; }
+.dots label { position: relative; }
+.dots input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.dots span {
+  display: block; text-align: center; padding: .45rem 0; border: 1px solid var(--rule); border-radius: 4px;
+  background: var(--surface); font-size: .9rem; font-variant-numeric: tabular-nums; cursor: pointer;
+}
+.dots input:checked + span { background: var(--blue); color: var(--blue-ink); border-color: var(--blue); }
+.dots input:focus-visible + span { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.matrix-row { padding: .85rem 0; border-bottom: 1px dashed var(--rule); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .5rem 1rem; align-items: center; }
+.matrix-row:last-child { border-bottom: 0; }
+.matrix-row legend { padding: 0; float: left; width: 100%; }
+.matrix-row .ml { font-weight: 500; }
+.matrix-row .md { display: block; color: var(--muted); font-size: .86rem; }
+.matrix-row .seg span { padding: .35rem .75rem; font-size: .85rem; }
+
+.nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+  padding: .75rem 1.3rem; border-radius: 4px; border: 1px solid var(--blue);
+  background: var(--blue); color: var(--blue-ink); font-weight: 500; cursor: pointer; text-decoration: none;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn.quiet { background: transparent; color: var(--ink); border-color: var(--rule); }
+.btn.quiet:hover { border-color: var(--blue); filter: none; }
+.btn[hidden] { display: none; }
+
+.review-list { list-style: none; padding: 0; margin: 0 0 2.5rem; border-top: 1px solid var(--rule); }
+.review-list li { display: grid; grid-template-columns: 2rem 1fr auto; gap: .75rem; align-items: baseline; padding: .8rem 0; border-bottom: 1px solid var(--rule); }
+.review-list .rn { color: var(--muted); font-variant-numeric: tabular-nums; }
+.review-list button { background: none; border: 0; padding: 0; color: var(--ink); text-align: left; cursor: pointer; font-size: 1rem; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+.review-list .rc { font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.actions { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.25rem 0; }
+.status { min-height: 1.4rem; font-size: .92rem; color: var(--sepia); margin: .5rem 0 0; }
+.send-note { background: var(--blue-soft); border-left: 3px solid var(--blue); padding: 1rem 1.2rem; margin: 1.5rem 0; }
+.send-note p { margin: .2rem 0; }
+.fallback { margin-top: 1rem; }
+.fallback textarea { min-height: 14rem; font-size: .85rem; overflow: auto; }
+.reset { margin-top: 3rem; font-size: .88rem; color: var(--muted); }
+.reset button { background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; cursor: pointer; }
+
+@media (max-width: 860px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .rail { display: none; }
+  .topbar {
+    display: block; position: sticky; top: 0; z-index: 5; background: var(--paper);
+    border-bottom: 1px solid var(--rule); padding: .7rem 1.25rem .6rem;
+    padding-top: calc(.7rem + env(safe-area-inset-top, 0px)); margin-top: calc(-1 * env(safe-area-inset-top, 0px));
+  }
+  .topbar-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; font-size: .85rem; }
+  .topbar select { font: inherit; font-size: .85rem; background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: 4px; padding: .3rem .4rem; max-width: 60%; }
+  .topbar .strip { margin: .55rem 0 0; }
+  main { padding-top: 2rem; }
+  .field, .help { margin-left: 0; }
+  .prompt { grid-template-columns: 2.3rem 1fr; }
+  .matrix-row { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail" aria-label="Form sections">
+    <p class="rail-name">Aryan Gulati</p>
+    <p class="rail-role">Narrative strategy and content architecture</p>
+    <ol id="railList"></ol>
+    <div class="strip" id="railStrip" aria-hidden="true"></div>
+    <p class="strip-label" id="railStripLabel"></p>
+    <p class="saved" id="savedNote">Your answers are saved on this device as you type.</p>
+  </aside>
+
+  <div>
+    <div class="topbar">
+      <div class="topbar-row">
+        <span id="topLabel">Introduction</span>
+        <label class="visually-hidden" for="topSelect" style="position:absolute;left:-9999px">Jump to section</label>
+        <select id="topSelect"></select>
+      </div>
+      <div class="strip" id="topStrip" aria-hidden="true"></div>
+    </div>
+    <main id="main" tabindex="-1"></main>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CONSULTANT = { name: "Aryan Gulati", email: "aryangulati05@gmail.com" };
+  var STORE_KEY = "linkedin-intake-v1";
+
+  var YMN = ["Yes", "Maybe", "No"];
+
+  var SECTIONS = [
+    { title: "About you and logistics",
+      intro: "The basics, so the working rhythm is set up correctly from week one.",
+      items: [
+        { id: "1.1", type: "text", q: "Full name as you want it to appear publicly" },
+        { id: "1.2", type: "long", q: "Current role, organisation and sector" },
+        { id: "1.3", type: "long", q: "Total years of professional experience, and the two or three roles that shaped you most" },
+        { id: "1.4", type: "url", q: "LinkedIn profile URL" },
+        { id: "1.5", type: "long", q: "Other platforms you are active on or would consider", help: "X, Instagram, Substack, Medium, a personal website, or none." },
+        { id: "1.6", type: "text", q: "City and time zone" },
+        { id: "1.7", type: "choice", q: "Preferred day for our weekly call", options: ["Saturday", "Sunday", "Either works"], sub: { id: "1.7b", label: "Preferred time window" } },
+        { id: "1.8", type: "choice", q: "Preferred channel for quick exchanges between calls", options: ["WhatsApp", "Email", "Slack", "Google Docs comments", "Other"] },
+        { id: "1.9", type: "long", q: "Dates in the next four months when you will be unavailable", help: "Travel, leave, heavy work periods." }
+      ] },
+    { title: "Where your presence stands today",
+      intro: "This sets a baseline, so progress at month four can be measured against something concrete rather than a feeling.",
+      items: [
+        { id: "2.1", type: "text", q: "Approximately how many connections and followers do you have?" },
+        { id: "2.2", type: "long", q: "How often have you posted in the last 12 months, and when was your last post?" },
+        { id: "2.3", type: "long", q: "Which of your past posts, if any, received a response you did not expect?", help: "Positive or negative. Paste links if you have them." },
+        { id: "2.4", type: "long", q: "When you have thought about posting and then decided not to, what stopped you?" },
+        { id: "2.5", type: "multi", q: "How do you currently use LinkedIn?", options: ["Reading my feed", "Commenting on others' posts", "Job search", "Hiring", "Sales or business development", "Mostly inactive"] },
+        { id: "2.6", type: "long", q: "When did you last update your headline, About section and experience entries?" },
+        { id: "2.7", type: "long", q: "If a senior stranger looked at your profile today, what would they conclude about you, and how far is that from the truth?" },
+        { id: "2.8", type: "scale", q: "How comfortable are you being visible online?", ends: ["Very uncomfortable", "Completely at ease"], sub: { id: "2.8b", label: "What would move that number up by one?", long: true } }
+      ] },
+    { title: "Why now, and what success looks like",
+      intro: "A presence built for a job search reads very differently from one built to attract clients or speaking invitations. This section decides which one we are building.",
+      items: [
+        { id: "3.1", type: "multi", stars: 2, q: "Tick every outcome that applies, then star your top two", options: ["Being considered for a next role or promotion", "Being recognised as an authority in a specific field", "Attracting clients, consulting work or partnerships", "Speaking, panel, podcast or media invitations", "Board, advisory or fellowship opportunities", "Hiring and attracting talent to my team", "Raising the profile of my organisation or cause", "Rebuilding my network after a break or relocation", "Documenting my thinking for its own sake"], sub: { id: "3.1b", label: "Anything else? Describe it here" } },
+        { id: "3.2", type: "long", q: "What prompted you to take this on now rather than six months ago or six months from now?" },
+        { id: "3.3", type: "long", q: "Four months from today this has worked well. What specifically has happened?", help: "Who has messaged you, what have you been invited to, what has changed?" },
+        { id: "3.4", type: "long", q: "Four months from today it has gone badly. What does that look like, and what do you most want to avoid?" },
+        { id: "3.5", type: "multi", q: "Which numbers matter to you?", options: ["Followers", "Post reach", "Profile views", "Inbound messages", "Invitations and opportunities", "None of these"] },
+        { id: "3.6", type: "long", q: "Where do you want your professional life to be in three years, and how could LinkedIn make that more likely?" }
+      ] },
+    { title: "Audience",
+      intro: "Content written for everyone tends to reach no one in particular. The more precisely you describe the reader, the more precisely every post can be aimed.",
+      items: [
+        { id: "4.1", type: "long", q: "Describe the one person you most want reading your posts", help: "Their role, seniority, sector, and what keeps them busy on a Monday morning." },
+        { id: "4.2", type: "long", q: "Name up to five real people, or job titles, whose attention would change something for you" },
+        { id: "4.3", type: "long", q: "Who is your secondary audience?", help: "Peers, juniors you mentor, potential hires, clients, funders, policy makers." },
+        { id: "4.4", type: "long", q: "What does your primary reader already believe about your field that you think is incomplete or wrong?" },
+        { id: "4.5", type: "long", q: "What problem does this reader have that you are unusually well placed to help with?" },
+        { id: "4.6", type: "long", q: "Which geographies and industries should the content speak to? Are there audiences you would rather not attract?" },
+        { id: "4.7", type: "long", q: "When you read LinkedIn yourself, what makes you stop scrolling, and what makes you roll your eyes?" }
+      ] },
+    { title: "Niche and positioning",
+      intro: "A niche is rarely picked from a list. It is usually found where your experience, your convictions and a specific audience's needs overlap. Answer instinctively and refine later; this section carries the most weight.",
+      items: [
+        { type: "group", text: "Expertise and evidence" },
+        { id: "5.1", type: "long", q: "What do colleagues, juniors or clients most often come to you for?", help: "Complete the sentence: \u201CPeople call me when\u2026\u201D" },
+        { id: "5.2", type: "long", q: "What did you learn the hard way that most people in your field still learn the hard way?" },
+        { id: "5.3", type: "long", q: "Which two areas of your experience rarely sit together in one person?", help: "For example, finance and design, or policy and operations." },
+        { id: "5.4", type: "long", q: "Which piece of work, decision or result are you proudest of, and why does it matter beyond your organisation?" },
+        { id: "5.5", type: "long", q: "Which topics could you speak about for an hour with no preparation?" },
+        { type: "group", text: "Opinion and conviction" },
+        { id: "5.6", type: "long", q: "Which widely accepted practice in your industry do you think is overrated, outdated or quietly harmful?" },
+        { id: "5.7", type: "long", q: "What do you believe that a reasonable peer in your field would disagree with?" },
+        { id: "5.8", type: "long", q: "Which conversations in your sector frustrate you because they stay at the surface? What is missing from them?" },
+        { id: "5.9", type: "long", q: "If you could change one thing about how your industry works, what would it be?" },
+        { type: "group", text: "Direction and boundaries" },
+        { id: "5.10", type: "long", q: "In three years, how would you like to be introduced at a conference?", help: "Write the introduction in one or two sentences." },
+        { id: "5.11", type: "long", q: "Which topics are you tired of being associated with, or never want to be known for?" },
+        { id: "5.12", type: "long", q: "Whose career or public presence do you quietly admire, and what specifically about it?" },
+        { id: "5.13", type: "long", q: "Are there personal interests, values or causes you would fold into your professional presence, or keep entirely separate?", help: "Art, parenting, mentoring, sustainability, inclusion, travel." },
+        { id: "5.14", type: "long", q: "If your LinkedIn could only ever be about one subject, what would you choose?" }
+      ] },
+    { title: "Voice and tone",
+      intro: "Every post will be drafted in your voice, so drafts need to sound like you on a good day rather than like a generic professional. This section calibrates that register.",
+      items: [
+        { id: "6.1", type: "sliders", q: "Where does your natural voice sit between each pair?", help: "1 leans fully left, 5 fully right.", rows: [["Formal and measured", "Conversational and relaxed"], ["Analytical and data-led", "Story-led and personal"], ["Reserved about personal life", "Open about personal life"], ["Diplomatic, avoids controversy", "Direct, takes a position"], ["Serious throughout", "Uses humour and warmth"], ["Teaches and explains", "Questions and provokes"], ["Polished and edited", "Raw and in-the-moment"]] },
+        { id: "6.2", type: "long", q: "Name two or three people whose writing you enjoy. What do they do that you would like to borrow?" },
+        { id: "6.3", type: "long", q: "What kind of LinkedIn post makes you cringe?", help: "Be specific about the habits you never want to see in your own feed." },
+        { id: "6.4", type: "matrix", q: "How much personal material are you comfortable sharing?", cols: ["Yes", "Sometimes", "Never"], rows: [{ l: "Career setbacks and failures" }, { l: "Family" }, { l: "Health" }, { l: "Identity" }, { l: "Money" }, { l: "Politics" }] },
+        { id: "6.5", type: "long", q: "Are there words, phrases or buzzwords you want banned from your drafts?" },
+        { id: "6.6", type: "matrix", q: "Language and style preferences", cols: null, rows: [{ l: "Spelling", opts: ["British", "American", "No preference"] }, { l: "Emojis", opts: ["Never", "Sparingly", "Freely"] }, { l: "Hashtags", opts: ["None", "Two or three", "No preference"] }], sub: { id: "6.6b", label: "Any use of Hindi or other languages you would like in posts?" } },
+        { id: "6.7", type: "long", q: "Paste or link one or two things you have written that sound most like you", help: "An email, a speech, a report, a message." },
+        { id: "6.8", type: "text", q: "Three words you would like readers to use about your presence after four months" }
+      ] },
+    { title: "Formats and capacity",
+      intro: "The calendar has to fit the time you actually have. Two strong posts a week sustained for four months will outperform an ambitious plan abandoned in week three.",
+      items: [
+        { id: "7.1", type: "matrix", q: "Which formats are you open to?", cols: YMN, rows: [
+          { l: "Text posts", d: "Short written posts, the core of most calendars" },
+          { l: "Image posts", d: "A single photo or graphic with a caption" },
+          { l: "Document or carousel posts", d: "Multi-slide PDFs that break down a framework or argument" },
+          { l: "Polls", d: "Quick audience questions that start conversations" },
+          { l: "Long-form articles", d: "800 to 1,500 word essays published on LinkedIn" },
+          { l: "Newsletter", d: "A recurring edition subscribers are notified about" },
+          { l: "Short video", d: "Talking to camera, 30 to 90 seconds" },
+          { l: "Live events or audio", d: "Hosted conversations or panels on LinkedIn" },
+          { l: "Strategic commenting", d: "Considered comments on other people's posts" },
+          { l: "Reposts with commentary", d: "Sharing others' work with your perspective added" }] },
+        { id: "7.2", type: "choice", q: "How many hours per week can you give to this?", help: "Including our call, reviewing drafts and replying to comments.", options: ["Under 1 hour", "1 to 2 hours", "2 to 4 hours", "More than 4 hours"] },
+        { id: "7.3", type: "choice", q: "How many posts per week feels realistic right now?", options: ["1", "2", "3", "4 or more"] },
+        { id: "7.4", type: "choice", q: "Are you comfortable appearing on camera or recording voice notes that can become content?", options: ["Both", "Voice notes only", "Camera only", "Neither for now"] },
+        { id: "7.5", type: "long", q: "Do you have professional or event photos we can use? Are you open to a fresh photoshoot?" },
+        { id: "7.6", type: "long", q: "Will you reply to comments and messages yourself, and within what timeframe?" }
+      ] },
+    { title: "Profile rework",
+      intro: "The profile is where every post sends people, so it is reworked first and aligned with the positioning we agree on.",
+      items: [
+        { id: "8.1", type: "multi", q: "Which profile elements should be in scope?", options: ["Headline", "About section", "Experience descriptions", "Featured section", "Skills and endorsements", "Profile photo", "Banner image", "Custom profile URL", "Education, certifications, volunteering and awards", "Recommendations (who to request them from)", "Creator mode, follow button and topics", "Not sure, please recommend"] },
+        { id: "8.2", type: "long", q: "Link your latest CV, bio, speaker profile or any press mentions", help: "Google Drive or Dropbox links work well. You can also email files separately." },
+        { id: "8.3", type: "long", q: "Which keywords or job titles should people be able to find you under?" },
+        { id: "8.4", type: "long", q: "Is there anything on your current profile you want removed, downplayed or reframed?" },
+        { id: "8.5", type: "choice", q: "Are you currently open to new roles?", options: ["Not looking", "Open, visible to recruiters only", "Open, visible publicly", "Let's discuss"] }
+      ] },
+    { title: "Boundaries, compliance and risk",
+      intro: "A public voice carries professional exposure. Knowing the limits upfront means drafts arrive ready to publish rather than needing to be pulled back.",
+      items: [
+        { id: "9.1", type: "choice", q: "Does your employer have a social media or external communications policy?", options: ["Yes, and posts need approval", "Yes, no approval needed", "No policy", "Not sure"], sub: { id: "9.1b", label: "Anything specific in the policy I should know?" } },
+        { id: "9.2", type: "long", q: "Which clients, projects, colleagues, numbers or internal matters must never be named or referenced?" },
+        { id: "9.3", type: "long", q: "Which topics are off-limits for you?", help: "Politics, religion, competitors, current or past employers." },
+        { id: "9.4", type: "long", q: "Have you had a difficult experience online before? What would you want handled differently?" },
+        { id: "9.5", type: "choice", q: "How should negative or hostile comments be handled?", options: ["Ignore", "Respond", "Hide", "Case by case"] },
+        { id: "9.6", type: "choice", q: "Are you comfortable with AI tools used in research and first drafts, provided every piece is edited to your voice and approved by you?", options: ["Yes", "No", "Let's discuss"] }
+      ] },
+    { title: "Scope of work and working model",
+      intro: "What is included, who does what, and how a draft moves from idea to published post.",
+      items: [
+        { id: "10.1", type: "multi", q: "Which deliverables do you want included?", options: ["Profile audit and full profile rewrite", "Positioning brief (niche, audience, content pillars, voice guide)", "Monthly content calendar", "Fully drafted posts for your review", "Long-form articles or a newsletter", "Carousel or document post design", "Poll and conversation-starter planning", "Commenting strategy", "Monthly performance review with recommendations", "Coaching so you can eventually write independently"] },
+        { id: "10.2", type: "choice", q: "Which working model suits you best?", options: ["I draft, you approve", "You share raw thoughts, I shape them", "We co-write on calls", "A mix"] },
+        { id: "10.3", type: "choice", q: "How quickly can you usually review a draft?", options: ["Same day", "Within 48 hours", "Once a week"] },
+        { id: "10.4", type: "choice", q: "Who will publish the posts?", help: "For security and platform-policy reasons, the recommended approach is that you publish from your own account and passwords are never shared.", options: ["I will publish from my account", "Let's discuss"] },
+        { id: "10.5", type: "multi", q: "What should the weekly call cover?", options: ["Reviewing drafts", "Capturing new ideas through conversation", "Reviewing performance", "Profile and strategy decisions"] },
+        { id: "10.6", type: "long", q: "Is there budget for tools or support beyond writing?", help: "Scheduling tools, design software, a photographer, LinkedIn Premium." },
+        { id: "10.7", type: "long", q: "Is there anything you explicitly do not want included?" },
+        { id: "10.8", type: "long", q: "What would you like to be able to do on your own by the end of the engagement?" }
+      ] },
+    { title: "Raw material and upcoming moments",
+      intro: "The strongest content is usually already sitting in your calendar, your inbox and your memory. This section collects it before planning begins.",
+      items: [
+        { id: "11.1", type: "long", q: "Events, launches, conferences, reports or milestones in the next four months we could build content around" },
+        { id: "11.2", type: "long", q: "Two or three stories from your career that you tell often", help: "A few lines each is enough." },
+        { id: "11.3", type: "long", q: "Links to existing material", help: "Talks, panels, podcasts, articles, reports, or decks you are allowed to reference." },
+        { id: "11.4", type: "long", q: "Which books, thinkers, frameworks or research have shaped how you work?" },
+        { id: "11.5", type: "long", q: "What questions do juniors, clients or peers ask you repeatedly?", help: "Each one is a potential post." },
+        { id: "11.6", type: "long", q: "Is there anything else you want me to know, including worries or expectations you have not been asked about?" }
+      ] }
+  ];
+
+  // ---------- state ----------
+  var answers = {};
+  var step = 0; // 0 intro, 1..N sections, N+1 review
+  var REVIEW = SECTIONS.length + 1;
+  var storageOk = true;
+
+  try {
+    var raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        answers = parsed.answers || {};
+        if (typeof parsed.step === "number" && parsed.step >= 0 && parsed.step <= REVIEW) step = parsed.step;
+      }
+    }
+  } catch (e) { storageOk = false; }
+
+  var saveTimer = null;
+  function persist() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify({ answers: answers, step: step })); storageOk = true; }
+      catch (e) { storageOk = false; }
+      updateSavedNote();
+    }, 300);
+  }
+  function updateSavedNote() {
+    var el = document.getElementById("savedNote");
+    el.textContent = storageOk
+      ? "Your answers are saved on this device as you type."
+      : "This browser is not saving progress, so finish in one sitting or download your answers before closing.";
+  }
+
+  // ---------- helpers ----------
+  function h(tag, attrs) {
+    var el = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      if (!Object.prototype.hasOwnProperty.call(attrs, k)) continue;
+      var v = attrs[k];
+      if (v === null || v === undefined || v === false) continue;
+      if (k === "class") el.className = v;
+      else if (k === "text") el.textContent = v;
+      else if (k.slice(0, 2) === "on") el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? "" : v);
+    }
+    for (var i = 2; i < arguments.length; i++) {
+      var c = arguments[i];
+      if (c === null || c === undefined) continue;
+      if (Array.isArray(c)) c.forEach(function (x) { if (x) el.appendChild(typeof x === "string" ? document.createTextNode(x) : x); });
+      else el.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+    }
+    return el;
+  }
+  function slug(id) { return "f" + id.replace(/\./g, "_"); }
+  function setAns(id, v) { answers[id] = v; persist(); refreshProgress(); }
+  function isAnswered(v) {
+    if (v === undefined || v === null) return false;
+    if (typeof v === "string") return v.trim() !== "";
+    if (typeof v === "number") return true;
+    if (Array.isArray(v)) return v.length > 0;
+    if (typeof v === "object") return Object.keys(v).length > 0;
+    return false;
+  }
+  function questionsOf(sec) { return sec.items.filter(function (i) { return i.type !== "group"; }); }
+  function sectionCount(sec) {
+    var qs = questionsOf(sec), done = 0;
+    qs.forEach(function (q) {
+      var a = isAnswered(answers[q.id]) || (q.sub && isAnswered(answers[q.sub.id]));
+      if (a) done++;
+    });
+    return { done: done, total: qs.length };
+  }
+  function autosize(t) { t.style.height = "auto"; t.style.height = Math.max(t.scrollHeight + 2, 84) + "px"; }
+
+  // ---------- renderers ----------
+  function promptEl(q, tag, forId) {
+    var attrs = { class: "prompt" };
+    if (forId) attrs["for"] = forId;
+    return h(tag, attrs, h("span", { class: "n", text: q.id }), h("span", { class: "t", text: q.q }));
+  }
+  function helpEl(q, id) { return q.help ? h("p", { class: "help", id: id, text: q.help }) : null; }
+
+  function textField(id, long, labelledBy) {
+    var el;
+    if (long) {
+      el = h("textarea", { id: slug(id), rows: "3", "aria-describedby": labelledBy || null });
+      el.value = answers[id] || "";
+      el.addEventListener("input", function () { autosize(el); setAns(id, el.value); });
+      requestAnimationFrame(function () { autosize(el); });
+    } else {
+      el = h("input", { type: "text", id: slug(id), "aria-describedby": labelledBy || null, autocomplete: "off" });
+      el.value = answers[id] || "";
+      el.addEventListener("input", function () { setAns(id, el.value); });
+    }
+    return el;
+  }
+
+  function subField(sub) {
+    var fid = slug(sub.id);
+    var input = textField(sub.id, !!sub.long);
+    return h("div", { class: "sub-input" }, h("label", { class: "sub-label", "for": fid, text: sub.label }), input);
+  }
+
+  function segGroup(name, options, current, onPick, cls) {
+    return h("div", { class: cls || "seg" }, options.map(function (opt) {
+      var inp = h("input", { type: "radio", name: name, value: opt });
+      if (current === opt) inp.checked = true;
+      inp.addEventListener("change", function () { if (inp.checked) onPick(opt); });
+      return h("label", null, inp, h("span", { text: opt }));
+    }));
+  }
+
+  function renderQuestion(q) {
+    if (q.type === "group") return h("p", { class: "group", text: q.text });
+    var wrap = h("div", { class: "q", id: "q-" + slug(q.id) });
+    var helpId = q.help ? "h-" + slug(q.id) : null;
+
+    if (q.type === "text" || q.type === "long" || q.type === "url") {
+      wrap.appendChild(promptEl(q, "label", slug(q.id)));
+      if (q.help) wrap.appendChild(helpEl(q, helpId));
+      var f = textField(q.id, q.type === "long", helpId);
+      if (q.type === "url") { f.setAttribute("type", "url"); f.setAttribute("placeholder", "https://www.linkedin.com/in/"); }
+      wrap.appendChild(h("div", { class: "field" }, f));
+      return wrap;
+    }
+
+    var fs = h("fieldset", { "aria-describedby": helpId });
+    fs.appendChild(promptEl(q, "legend"));
+    if (q.help) fs.appendChild(helpEl(q, helpId));
+    var field = h("div", { class: "field" });
+
+    if (q.type === "choice") {
+      field.appendChild(segGroup(slug(q.id), q.options, answers[q.id], function (v) { setAns(q.id, v); }));
+    }
+
+    if (q.type === "scale") {
+      field.appendChild(h("div", { class: "scale-ends" }, h("span", { text: "1 " + q.ends[0] }), h("span", { text: "5 " + q.ends[1] })));
+      field.appendChild(segGroup(slug(q.id), ["1", "2", "3", "4", "5"], answers[q.id] != null ? String(answers[q.id]) : null, function (v) { setAns(q.id, Number(v)); }, "dots"));
+    }
+
+    if (q.type === "multi") {
+      var cur = Array.isArray(answers[q.id]) ? answers[q.id].slice() : [];
+      var starKey = q.id + "*";
+      var stars = Array.isArray(answers[starKey]) ? answers[starKey].slice() : [];
+      var hint = q.stars ? h("p", { class: "hint", "aria-live": "polite" }) : null;
+      var starButtons = [];
+      function syncStars() {
+        starButtons.forEach(function (b) {
+          var opt = b.getAttribute("data-opt");
+          var on = stars.indexOf(opt) > -1;
+          b.setAttribute("aria-pressed", on ? "true" : "false");
+          b.textContent = on ? "Top priority" : "Star";
+          b.disabled = cur.indexOf(opt) === -1 || (!on && stars.length >= q.stars);
+        });
+        if (hint) hint.textContent = stars.length >= q.stars ? "Two priorities starred. Unstar one to change your choice." : (stars.length ? "One priority starred. Star one more." : "");
+      }
+      var list = h("div", { class: "checks" }, q.options.map(function (opt, i) {
+        var cid = slug(q.id) + "_" + i;
+        var cb = h("input", { type: "checkbox", id: cid, value: opt });
+        if (cur.indexOf(opt) > -1) cb.checked = true;
+        cb.addEventListener("change", function () {
+          if (cb.checked) { if (cur.indexOf(opt) === -1) cur.push(opt); }
+          else {
+            cur = cur.filter(function (x) { return x !== opt; });
+            stars = stars.filter(function (x) { return x !== opt; });
+            if (q.stars) setAns(starKey, stars.slice());
+          }
+          setAns(q.id, cur.slice());
+          if (q.stars) syncStars();
+        });
+        var row = h("div", { class: "check-row" }, h("label", { "for": cid }, cb, h("span", { text: opt })));
+        if (q.stars) {
+          var sb = h("button", { type: "button", class: "star", "data-opt": opt, "aria-label": "Mark as top priority: " + opt });
+          sb.addEventListener("click", function () {
+            var idx = stars.indexOf(opt);
+            if (idx > -1) stars.splice(idx, 1);
+            else if (stars.length < q.stars) stars.push(opt);
+            setAns(starKey, stars.slice());
+            syncStars();
+          });
+          starButtons.push(sb);
+          row.appendChild(sb);
+        }
+        return row;
+      }));
+      field.appendChild(list);
+      if (hint) { field.appendChild(hint); syncStars(); }
+    }
+
+    if (q.type === "sliders") {
+      var sv = (answers[q.id] && typeof answers[q.id] === "object") ? Object.assign({}, answers[q.id]) : {};
+      q.rows.forEach(function (pair, i) {
+        var row = h("fieldset", { class: "scale-row" },
+          h("legend", { style: "position:absolute;left:-9999px", text: pair[0] + " to " + pair[1] }),
+          h("div", { class: "scale-ends", "aria-hidden": "true" }, h("span", { text: pair[0] }), h("span", { text: pair[1] })),
+          segGroup(slug(q.id) + "_" + i, ["1", "2", "3", "4", "5"], sv[i] != null ? String(sv[i]) : null, function (v) { sv[i] = Number(v); setAns(q.id, Object.assign({}, sv)); }, "dots"));
+        field.appendChild(row);
+      });
+    }
+
+    if (q.type === "matrix") {
+      var mv = (answers[q.id] && typeof answers[q.id] === "object") ? Object.assign({}, answers[q.id]) : {};
+      q.rows.forEach(function (r, i) {
+        var opts = r.opts || q.cols;
+        var row = h("fieldset", { class: "matrix-row" },
+          h("legend", null, h("span", { class: "ml", text: r.l }), r.d ? h("span", { class: "md", text: r.d }) : null),
+          segGroup(slug(q.id) + "_" + i, opts, mv[i] || null, function (v) { mv[i] = v; setAns(q.id, Object.assign({}, mv)); }));
+        field.appendChild(row);
+      });
+    }
+
+    if (q.sub) field.appendChild(subField(q.sub));
+    fs.appendChild(field);
+    wrap.appendChild(fs);
+    return wrap;
+  }
+
+  // ---------- views ----------
+  var main = document.getElementById("main");
+
+  function navButtons() {
+    var prev = h("button", { type: "button", class: "btn quiet", onclick: function () { go(step - 1); } }, step === 1 ? "Back to introduction" : "Previous section");
+    var nextLabel = step === SECTIONS.length ? "Review and send" : "Next section";
+    var next = h("button", { type: "button", class: "btn", onclick: function () { go(step + 1); } }, nextLabel);
+    return h("div", { class: "nav" }, prev, next);
+  }
+
+  function renderIntro() {
+    return h("div", { class: "col intro" },
+      h("h1", { text: "Before we write anything, let\u2019s decide what you want to be known for." }),
+      h("p", { class: "lede", text: "This form opens a three to four month engagement to rebuild your LinkedIn presence: your profile, a positioning strategy, and a personal content calendar across posts, articles, polls, documents and other formats." }),
+      h("p", { text: "Most people who hand over their LinkedIn do not arrive with a defined niche, and you are not expected to. The questions are designed to surface the direction already present in your work history, your opinions and your instincts, so the strategy is built from your material rather than borrowed from someone else\u2019s template. Your answers become a positioning brief that we review together on our first call, and every answer can be revised once we see how the content performs." }),
+      h("dl", { class: "facts" },
+        h("dt", { text: "Duration" }), h("dd", { text: "3 to 4 months" }),
+        h("dt", { text: "Working calls" }), h("dd", { text: "Weekly, on Saturday or Sunday" }),
+        h("dt", { text: "Current stage" }), h("dd", { text: "Scoping and discovery" }),
+        h("dt", { text: "Deliverables" }), h("dd", { text: "Profile rework, positioning brief, content strategy, monthly calendar and drafted content" }),
+        h("dt", { text: "Time to complete" }), h("dd", { text: "45 to 60 minutes, in one or several sittings" })),
+      h("ul", { class: "guidance" },
+        h("li", { text: "Fragments, bullet points and pasted voice-note transcripts are all fine." }),
+        h("li", { text: "Leave anything you are unsure about blank, or write \u201Clet\u2019s discuss\u201D. An honest \u201CI don\u2019t know yet\u201D is more useful than a guess." }),
+        h("li", { text: "If you are short on time, prioritise Section 5 (niche and positioning) and Section 6 (voice and tone)." }),
+        h("li", { text: "Your answers are used only to shape your strategy and content." })),
+      h("button", { type: "button", class: "btn", onclick: function () { go(1); } }, isAnyAnswered() ? "Continue where you left off" : "Begin with Section 1")
+    );
+  }
+  function isAnyAnswered() { return Object.keys(answers).some(function (k) { return isAnswered(answers[k]); }); }
+
+  function renderSection(i) {
+    var sec = SECTIONS[i - 1];
+    var col = h("div", { class: "col" },
+      h("header", { class: "sec-head" },
+        h("p", { class: "sec-kicker", text: "Section " + i + " of " + SECTIONS.length }),
+        h("h2", { text: sec.title }),
+        h("p", { text: sec.intro })));
+    sec.items.forEach(function (q) { col.appendChild(renderQuestion(q)); });
+    col.appendChild(navButtons());
+    return col;
+  }
+
+  // ---------- export ----------
+  function fmt(q) {
+    var v = answers[q.id], out = [];
+    if (q.type === "multi") {
+      var stars = answers[q.id + "*"] || [];
+      if (Array.isArray(v) && v.length) v.forEach(function (o) { out.push("- " + o + (stars.indexOf(o) > -1 ? " (top priority)" : "")); });
+    } else if (q.type === "sliders") {
+      if (v) q.rows.forEach(function (p, i) { if (v[i] != null) out.push("- " + p[0] + " / " + p[1] + ": " + v[i] + " of 5"); });
+    } else if (q.type === "matrix") {
+      if (v) q.rows.forEach(function (r, i) { if (v[i]) out.push("- " + r.l + ": " + v[i]); });
+    } else if (q.type === "scale") {
+      if (v != null) out.push(v + " of 5 (1 = " + q.ends[0] + ", 5 = " + q.ends[1] + ")");
+    } else if (isAnswered(v)) {
+      out.push(String(v).trim());
+    }
+    if (q.sub && isAnswered(answers[q.sub.id])) out.push(q.sub.label + ": " + String(answers[q.sub.id]).trim());
+    return out.length ? out.join("\n") : "(not answered)";
+  }
+  function clientName() { var n = (answers["1.1"] || "").trim(); return n || "Client"; }
+  function buildExport() {
+    var d = new Date();
+    var lines = ["# LinkedIn engagement intake: " + clientName(), "", "Prepared for " + CONSULTANT.name + ". Exported " + d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) + ".", ""];
+    SECTIONS.forEach(function (sec, i) {
+      lines.push("## Section " + (i + 1) + ": " + sec.title, "");
+      sec.items.forEach(function (q) {
+        if (q.type === "group") { lines.push("### " + q.text, ""); return; }
+        lines.push("**" + q.id + " " + q.q + "**", "", fmt(q), "");
+      });
+    });
+    return lines.join("\n");
+  }
+  function fileName() {
+    var base = clientName().replace(/[^A-Za-z0-9 ]+/g, "").trim().replace(/\s+/g, "_") || "Client";
+    return "LinkedIn_Intake_" + base + ".md";
+  }
+
+  var downloadsNs = null;
+  function renderReview() {
+    var col = h("div", { class: "col" },
+      h("header", { class: "sec-head" },
+        h("p", { class: "sec-kicker", text: "Final step" }),
+        h("h2", { text: "Review and send your answers" }),
+        h("p", { text: "Here is how complete each section is. Blank answers are fine; we will cover them on our first call." })));
+
+    var list = h("ol", { class: "review-list" });
+    SECTIONS.forEach(function (sec, i) {
+      var c = sectionCount(sec);
+      list.appendChild(h("li", null,
+        h("span", { class: "rn", text: String(i + 1) }),
+        h("button", { type: "button", onclick: function () { go(i + 1); } }, sec.title),
+        h("span", { class: "rc", text: c.done + " of " + c.total + " answered" })));
+    });
+    col.appendChild(list);
+
+    var status = h("p", { class: "status", role: "status", "aria-live": "polite" });
+    var fallbackWrap = h("div", { class: "fallback", hidden: true });
+    var dlBtn = h("button", { type: "button", class: "btn", hidden: true }, "Download my answers");
+    var copyBtn = h("button", { type: "button", class: "btn quiet" }, "Copy my answers");
+    var showBtn = h("button", { type: "button", class: "btn quiet" }, "Show answers as text");
+
+    function showFallback() {
+      fallbackWrap.hidden = false;
+      fallbackWrap.innerHTML = "";
+      var ta = h("textarea", { readonly: true, "aria-label": "All answers as text" });
+      ta.value = buildExport();
+      fallbackWrap.appendChild(ta);
+      ta.focus(); ta.select();
+      return ta;
+    }
+
+    dlBtn.addEventListener("click", function () {
+      if (!downloadsNs) {
+        try {
+          var blob = new Blob([buildExport()], { type: "text/markdown;charset=utf-8" });
+          var url = URL.createObjectURL(blob);
+          var a = h("a", { href: url, download: fileName(), style: "display:none" });
+          document.body.appendChild(a); a.click();
+          setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1000);
+          status.textContent = "Downloaded. Attach the file to an email to " + CONSULTANT.email + ".";
+        } catch (e) { status.textContent = "Download did not start. Copy your answers instead."; }
+        return;
+      }
+      status.textContent = "Preparing your file\u2026";
+      downloadsNs.save({ filename: fileName(), data: buildExport() }).then(function () {
+        status.textContent = "Downloaded. Attach the file to an email to " + CONSULTANT.email + ".";
+      }).catch(function (err) {
+        var code = err && err.code;
+        if (code === "declined") status.textContent = "Download cancelled. You can try again, or copy your answers instead.";
+        else if (code === "rate_limited") status.textContent = "A download prompt is already open. Finish that one first.";
+        else { dlBtn.hidden = true; status.textContent = "Downloads are not available here. Copy your answers instead."; }
+      });
+    });
+
+    copyBtn.addEventListener("click", function () {
+      var text = buildExport();
+      var done = function () { status.textContent = "Copied. Paste into an email to " + CONSULTANT.email + "."; };
+      var fallback = function () {
+        var ta = showFallback();
+        var ok = false;
+        try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+        status.textContent = ok ? "Copied. Paste into an email to " + CONSULTANT.email + "." : "Select the text below and copy it manually.";
+        ta.select();
+      };
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+        else fallback();
+      } catch (e) { fallback(); }
+    });
+
+    showBtn.addEventListener("click", function () { showFallback(); status.textContent = "Your answers are shown below."; });
+
+    col.appendChild(h("div", { class: "send-note" },
+      h("p", null, h("strong", { text: "How to send: " }), "download or copy your answers, then email them to " + CONSULTANT.name + "."),
+      h("p", null, h("a", { href: "mailto:" + CONSULTANT.email + "?subject=" + encodeURIComponent("LinkedIn intake: " + clientName()) }, CONSULTANT.email))));
+    col.appendChild(h("div", { class: "actions" }, dlBtn, copyBtn, showBtn));
+    col.appendChild(status);
+    col.appendChild(fallbackWrap);
+
+    dlBtn.hidden = false;
+    if (downloadsNs) {}
+    else if (window.claude && typeof window.claude.use === "function") {
+      window.claude.use("downloads").then(function (ns) { downloadsNs = ns; }).catch(function () {});
+    }
+
+    var resetArmed = false;
+    var resetBtn = h("button", { type: "button" }, "Clear all my answers");
+    resetBtn.addEventListener("click", function () {
+      if (!resetArmed) { resetArmed = true; resetBtn.textContent = "Click again to permanently clear every answer on this device"; return; }
+      answers = {};
+      try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+      go(0);
+    });
+    col.appendChild(h("p", { class: "reset" }, resetBtn));
+
+    col.appendChild(h("div", { class: "nav" },
+      h("button", { type: "button", class: "btn quiet", onclick: function () { go(SECTIONS.length); } }, "Previous section"),
+      h("span")));
+    return col;
+  }
+
+  // ---------- progress + navigation ----------
+  var railList = document.getElementById("railList");
+  var topSelect = document.getElementById("topSelect");
+
+  function buildNav() {
+    railList.innerHTML = "";
+    topSelect.innerHTML = "";
+    var entries = [{ label: "Introduction", n: "" }].concat(SECTIONS.map(function (s, i) { return { label: s.title, n: String(i + 1) }; }), [{ label: "Review and send", n: "" }]);
+    entries.forEach(function (e, idx) {
+      var count = h("span", { class: "count" });
+      var b = h("button", { type: "button", "data-step": idx, onclick: function () { go(idx); } },
+        h("span", { class: "num", text: e.n }), h("span", { text: e.label }), count);
+      railList.appendChild(h("li", null, b));
+      topSelect.appendChild(h("option", { value: String(idx), text: (e.n ? e.n + ". " : "") + e.label }));
+    });
+    topSelect.addEventListener("change", function () { go(Number(topSelect.value)); });
+  }
+
+  function refreshProgress() {
+    var btns = railList.querySelectorAll("button");
+    var totalDone = 0, total = 0;
+    var levels = SECTIONS.map(function (sec, i) {
+      var c = sectionCount(sec);
+      totalDone += c.done; total += c.total;
+      var cnt = btns[i + 1] && btns[i + 1].querySelector(".count");
+      if (cnt) { cnt.textContent = c.done + "/" + c.total; cnt.className = "count" + (c.done === c.total ? " full" : ""); }
+      var r = c.done / c.total;
+      return r === 0 ? "" : r < 0.4 ? "lvl1" : r < 1 ? "lvl2" : "lvl3";
+    });
+    ["railStrip", "topStrip"].forEach(function (id) {
+      var s = document.getElementById(id);
+      if (s.children.length !== SECTIONS.length) { s.innerHTML = ""; SECTIONS.forEach(function () { s.appendChild(h("span")); }); }
+      levels.forEach(function (l, i) { s.children[i].className = l; });
+    });
+    document.getElementById("railStripLabel").textContent = totalDone + " of " + total + " questions answered";
+  }
+
+  function go(n) {
+    step = Math.max(0, Math.min(REVIEW, n));
+    persist();
+    main.innerHTML = "";
+    if (step === 0) main.appendChild(renderIntro());
+    else if (step === REVIEW) main.appendChild(renderReview());
+    else main.appendChild(renderSection(step));
+    railList.querySelectorAll("button").forEach(function (b) {
+      if (Number(b.getAttribute("data-step")) === step) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current");
+    });
+    topSelect.value = String(step);
+    document.getElementById("topLabel").textContent = step === 0 ? "Introduction" : step === REVIEW ? "Review and send" : "Section " + step + " of " + SECTIONS.length;
+    refreshProgress();
+    try { window.scrollTo(0, 0); } catch (e) {}
+    main.focus({ preventScroll: true });
+  }
+
+  buildNav();
+  updateSavedNote();
+  go(step);
+
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("downloads").then(function (ns) {
+      downloadsNs = ns;
+      if (ns && step === REVIEW) go(REVIEW);
+    }).catch(function () {});
+  }
+})();
+</script>
+</body>
+</html>
